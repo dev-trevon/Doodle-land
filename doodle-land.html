@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Doodle Land</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-display: 'Baloo 2', 'Segoe UI Rounded', 'Comic Sans MS', system-ui, sans-serif;
+    --font-body: 'Quicksand', 'Segoe UI Rounded', 'Comic Sans MS', system-ui, sans-serif;
+
+    --bg: #EAF6FF;
+    --bg-soft: #DCEFFF;
+    --panel: #FFFFFF;
+    --ink: #24304A;
+    --ink-soft: #5C6B8A;
+    --border: #D4E7F7;
+    --accent: #FF9F1C;
+    --accent-ink: #7A3E00;
+    --accent-2: #2EC4B6;
+    --danger: #E63946;
+    --danger-soft: #FFE1E4;
+    --shadow: rgba(36, 48, 74, 0.14);
+    --paper: #FFFFFF;
+    --paper-border: #22223B;
+    --radius-lg: 26px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #121A2B;
+      --bg-soft: #182338;
+      --panel: #1C2740;
+      --ink: #EDF2FB;
+      --ink-soft: #9FAEC9;
+      --border: #2A3757;
+      --accent: #FFB13C;
+      --accent-ink: #3A2200;
+      --accent-2: #3FD6C8;
+      --danger: #FF6B76;
+      --danger-soft: #452328;
+      --shadow: rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #121A2B;
+    --bg-soft: #182338;
+    --panel: #1C2740;
+    --ink: #EDF2FB;
+    --ink-soft: #9FAEC9;
+    --border: #2A3757;
+    --accent: #FFB13C;
+    --accent-ink: #3A2200;
+    --accent-2: #3FD6C8;
+    --danger: #FF6B76;
+    --danger-soft: #452328;
+    --shadow: rgba(0, 0, 0, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background: radial-gradient(circle at 15% 0%, var(--bg-soft), var(--bg) 55%);
+    color: var(--ink);
+    font-family: var(--font-body);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px 18px 40px;
+    min-height: 100%;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    box-shadow: 0 10px 28px var(--shadow);
+    margin-bottom: 18px;
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+  }
+
+  .tab-btn:hover { transform: translateY(-2px); }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    box-shadow: 0 6px 16px var(--shadow);
+  }
+
+  .icon-btn {
+    font-size: 1.3rem;
+    background: var(--bg-soft);
+    border: 3px solid var(--border);
+    border-radius: 999px;
+    width: 52px;
+    height: 52px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s ease;
+  }
+  .icon-btn:hover { transform: scale(1.08) rotate(-4deg); }
+  .icon-btn:active { transform: scale(0.92); }
+
+  /* ---------- Panels ---------- */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeUp .3s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 22px var(--shadow);
+  }
+
+  .tool-group, .size-group, .action-group, .picture-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .action-group { margin-left: auto; }
+
+  button {
+    font-family: var(--font-body);
+    font-weight: 700;
+  }
+
+  .tool-btn, .pic-btn {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--bg-soft);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    min-height: 56px;
+    cursor: pointer;
+    transition: transform .12s ease, background .15s ease, border-color .15s ease;
+  }
+
+  .tool-btn:hover, .pic-btn:hover { transform: translateY(-2px); }
+  .tool-btn:active, .pic-btn:active { transform: scale(0.95); }
+
+  .tool-btn.active, .pic-btn.active {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+    color: #04322D;
+  }
+
+  .size-btn {
+    background: var(--bg-soft);
+    border: 3px solid var(--border);
+    border-radius: 999px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform .12s ease, border-color .15s ease;
+  }
+  .size-btn:hover { transform: translateY(-2px); }
+  .size-btn.active { border-color: var(--accent); background: var(--danger-soft); }
+
+  .dot { background: var(--ink); border-radius: 50%; display: block; }
+  .dot.small { width: 6px; height: 6px; }
+  .dot.medium { width: 12px; height: 12px; }
+  .dot.large { width: 20px; height: 20px; }
+
+  .icon-action {
+    background: var(--bg-soft);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-md);
+    min-height: 56px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform .12s ease;
+  }
+  .icon-action:hover:not(:disabled) { transform: translateY(-2px); }
+  .icon-action:active:not(:disabled) { transform: scale(0.94); }
+  .icon-action:disabled { opacity: .4; cursor: not-allowed; }
+  .icon-action.danger { color: var(--danger); border-color: var(--danger-soft); background: var(--danger-soft); }
+
+  .cta-btn {
+    font-family: var(--font-display);
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: var(--radius-md);
+    min-height: 56px;
+    padding: 12px 22px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 18px var(--shadow);
+    transition: transform .12s ease;
+  }
+  .cta-btn:hover { transform: translateY(-2px); }
+  .cta-btn:active { transform: scale(0.95); }
+  .cta-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ---------- Palette ---------- */
+  .palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 22px var(--shadow);
+  }
+
+  .swatch {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 4px solid var(--panel);
+    outline: 3px solid var(--border);
+    cursor: pointer;
+    transition: transform .12s ease, outline-color .15s ease;
+  }
+  .swatch:hover { transform: scale(1.08); }
+  .swatch.active { outline-color: var(--accent); transform: scale(1.12); }
+  .swatch:focus-visible { outline-color: var(--accent-2); }
+
+  /* ---------- Canvas / paper area ---------- */
+  .canvas-wrap {
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    box-shadow: 0 10px 26px var(--shadow);
+    display: flex;
+    justify-content: center;
+  }
+
+  .canvas-wrap.paper { background: var(--panel); }
+
+  #drawCanvas {
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 800 / 560;
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    border: 3px solid var(--paper-border);
+    touch-action: none;
+    cursor: crosshair;
+    display: block;
+  }
+
+  .coloring-svg {
+    display: none;
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 1 / 1;
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    border: 3px solid var(--paper-border);
+  }
+  .coloring-svg.active { display: block; }
+
+  .coloring-svg .fillable, .coloring-svg .fixed {
+    stroke: var(--paper-border);
+    stroke-width: 6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    transition: fill .12s ease;
+  }
+  .coloring-svg .fillable { fill: #FFFFFF; cursor: pointer; }
+  .coloring-svg .fillable:hover { filter: brightness(0.96); }
+  .coloring-svg .fixed { fill: var(--paper-border); pointer-events: none; }
+  .coloring-svg .fixed-line { fill: none; pointer-events: none; }
+
+  /* ---------- Lessons ---------- */
+  .lesson-area {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .lesson-area .canvas-wrap { flex: 1 1 320px; }
+
+  #lessonSvg {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    border: 3px solid var(--paper-border);
+    display: block;
+    margin: 0 auto;
+  }
+
+  .lesson-shape {
+    fill: none;
+    stroke: var(--paper-border);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .lesson-shape.step-new { animation: popIn .45s cubic-bezier(.34,1.56,.64,1); }
+
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .lesson-info {
+    flex: 1 1 260px;
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: 0 8px 22px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .step-indicator {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--accent-2);
+    font-size: 1rem;
+  }
+
+  .step-text {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  .lesson-nav {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+  }
+  .lesson-nav .icon-action, .lesson-nav .cta-btn { flex: 1; }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 20px);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-weight: 700;
+    padding: 12px 22px;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 640px) {
+    .brand span { display: inline; }
+    .action-group { margin-left: 0; width: 100%; justify-content: flex-start; }
+    .step-text { font-size: 1.15rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">🖍️ <span>Doodle Land</span></div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab-btn active" data-tab="draw" role="tab" aria-selected="true">🖌️ Draw</button>
+      <button class="tab-btn" data-tab="color" role="tab" aria-selected="false">🎨 Color</button>
+      <button class="tab-btn" data-tab="learn" role="tab" aria-selected="false">✏️ Learn</button>
+    </nav>
+    <button id="muteBtn" class="icon-btn" aria-label="Toggle sound" title="Toggle sound">🔊</button>
+  </header>
+
+  <main>
+
+    <!-- ===================== PAGE 1: FREE DRAW ===================== -->
+    <section id="panel-draw" class="panel active" aria-label="Free Draw Canvas">
+      <div class="toolbar">
+        <div class="tool-group" role="group" aria-label="Tools">
+          <button class="tool-btn active" data-tool="brush">🖌️ Brush</button>
+          <button class="tool-btn" data-tool="eraser">🧽 Eraser</button>
+          <button class="tool-btn" data-tool="fill">🪣 Fill</button>
+        </div>
+        <div class="size-group" role="group" aria-label="Brush size">
+          <button class="size-btn" data-size="4" title="Small"><span class="dot small"></span></button>
+          <button class="size-btn active" data-size="10" title="Medium"><span class="dot medium"></span></button>
+          <button class="size-btn" data-size="20" title="Big"><span class="dot large"></span></button>
+        </div>
+        <div class="action-group">
+          <button id="undoBtn" class="icon-action" title="Undo">↶ Undo</button>
+          <button id="redoBtn" class="icon-action" title="Redo">↷ Redo</button>
+          <button id="clearBtn" class="icon-action danger" title="Clear the page">🗑️ Clear</button>
+          <button id="saveBtn" class="cta-btn">💾 Save My Artwork</button>
+        </div>
+      </div>
+
+      <div class="palette" id="drawPalette" role="group" aria-label="Colors"></div>
+
+      <div class="canvas-wrap">
+        <canvas id="drawCanvas" width="800" height="560"></canvas>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 2: COLORING BOOK ===================== -->
+    <section id="panel-color" class="panel" aria-label="Digital Coloring Book">
+      <div class="toolbar">
+        <div class="picture-picker" id="picturePicker" role="group" aria-label="Choose a picture">
+          <button class="pic-btn active" data-pic="robot">🤖 Robot</button>
+          <button class="pic-btn" data-pic="star">⭐ Star</button>
+          <button class="pic-btn" data-pic="house">🏠 House</button>
+          <button class="pic-btn" data-pic="cat">🐱 Cat</button>
+        </div>
+        <div class="action-group">
+          <button id="clearColorsBtn" class="icon-action danger">🗑️ Clear Colors</button>
+        </div>
+      </div>
+
+      <div class="palette" id="colorPalette" role="group" aria-label="Colors"></div>
+
+      <div class="canvas-wrap paper" id="coloringWrap">
+        <svg class="coloring-svg active" data-pic="robot" viewBox="0 0 400 400" aria-label="Robot outline to color">
+          <rect class="fillable" x="95" y="60" width="210" height="130" rx="24"/>
+          <circle class="fixed" cx="150" cy="115" r="14"/>
+          <circle class="fixed" cx="250" cy="115" r="14"/>
+          <rect class="fixed" x="160" y="150" width="80" height="14" rx="7"/>
+          <rect class="fillable" x="185" y="15" width="30" height="50" rx="8"/>
+          <circle class="fillable" cx="200" cy="15" r="16"/>
+          <rect class="fillable" x="55" y="205" width="45" height="110" rx="14"/>
+          <rect class="fillable" x="300" y="205" width="45" height="110" rx="14"/>
+          <rect class="fillable" x="105" y="200" width="190" height="140" rx="18"/>
+          <circle class="fixed" cx="200" cy="245" r="10"/>
+          <circle class="fixed" cx="200" cy="280" r="10"/>
+          <rect class="fillable" x="125" y="345" width="55" height="45" rx="10"/>
+          <rect class="fillable" x="220" y="345" width="55" height="45" rx="10"/>
+        </svg>
+
+        <svg class="coloring-svg" data-pic="star" viewBox="0 0 400 400" aria-label="Star outline to color">
+          <polygon class="fillable" points="200,40 235,150 350,150 260,215 290,330 200,260 110,330 140,215 50,150 165,150"/>
+          <circle class="fixed" cx="178" cy="190" r="9"/>
+          <circle class="fixed" cx="222" cy="190" r="9"/>
+          <path class="fixed-line" d="M178 220 Q200 238 222 220"/>
+        </svg>
+
+        <svg class="coloring-svg" data-pic="house" viewBox="0 0 400 400" aria-label="House outline to color">
+          <rect class="fillable" x="262" y="95" width="32" height="70"/>
+          <polygon class="fillable" points="40,190 200,60 360,190"/>
+          <rect class="fillable" x="80" y="190" width="240" height="160"/>
+          <rect class="fillable" x="110" y="220" width="55" height="55"/>
+          <rect class="fillable" x="235" y="220" width="55" height="55"/>
+          <line class="fixed-line" x1="137" y1="220" x2="137" y2="275"/>
+          <line class="fixed-line" x1="110" y1="247" x2="165" y2="247"/>
+          <line class="fixed-line" x1="262" y1="220" x2="262" y2="275"/>
+          <line class="fixed-line" x1="235" y1="247" x2="290" y2="247"/>
+          <rect class="fillable" x="175" y="270" width="60" height="80"/>
+          <circle class="fixed" cx="220" cy="312" r="6"/>
+        </svg>
+
+        <svg class="coloring-svg" data-pic="cat" viewBox="0 0 400 400" aria-label="Cat outline to color">
+          <ellipse class="fillable" cx="200" cy="310" rx="105" ry="75"/>
+          <path class="fillable" d="M295 330 Q350 320 340 260 Q335 230 305 235 Q325 250 320 275 Q315 305 285 320 Z"/>
+          <circle class="fillable" cx="200" cy="170" r="85"/>
+          <polygon class="fillable" points="130,140 155,70 185,130"/>
+          <polygon class="fillable" points="270,140 245,70 215,130"/>
+          <circle class="fixed" cx="172" cy="160" r="10"/>
+          <circle class="fixed" cx="228" cy="160" r="10"/>
+          <polygon class="fixed" points="200,185 190,197 210,197"/>
+          <line class="fixed-line" x1="120" y1="185" x2="60" y2="175"/>
+          <line class="fixed-line" x1="120" y1="195" x2="60" y2="202"/>
+          <line class="fixed-line" x1="280" y1="185" x2="340" y2="175"/>
+          <line class="fixed-line" x1="280" y1="195" x2="340" y2="202"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ===================== PAGE 3: DRAWING LESSONS ===================== -->
+    <section id="panel-learn" class="panel" aria-label="Step-by-Step Drawing Lessons">
+      <div class="toolbar">
+        <div class="picture-picker" id="lessonPicker" role="group" aria-label="Choose what to learn to draw">
+          <button class="pic-btn active" data-lesson="cat">🐱 Cat</button>
+          <button class="pic-btn" data-lesson="star">⭐ Star</button>
+          <button class="pic-btn" data-lesson="robot">🤖 Robot</button>
+        </div>
+      </div>
+
+      <div class="lesson-area">
+        <div class="canvas-wrap paper">
+          <svg id="lessonSvg" viewBox="0 0 400 400" aria-label="Drawing lesson illustration"></svg>
+        </div>
+        <div class="lesson-info">
+          <div id="stepIndicator" class="step-indicator">Step 1 of 5</div>
+          <p id="stepText" class="step-text">Start with one big circle for the head.</p>
+          <div class="lesson-nav">
+            <button id="prevStepBtn" class="icon-action" disabled>← Back</button>
+            <button id="nextStepBtn" class="cta-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+     Shared helpers: sound, toast, palette
+     ============================================================ */
+
+  var muted = false;
+  var audioCtx = null;
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    return audioCtx;
+  }
+
+  function playPop(freq) {
+    if (muted) return;
+    try {
+      var ctx = ensureAudio();
+      if (!ctx) return;
+      if (ctx.state === "suspended") ctx.resume();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq || 620;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (e) { /* ignore audio errors */ }
+  }
+
+  var muteBtn = document.getElementById("muteBtn");
+  muteBtn.addEventListener("click", function () {
+    muted = !muted;
+    muteBtn.textContent = muted ? "🔇" : "🔊";
+  });
+
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove("show");
+    }, 1800);
+  }
+
+  var COLORS = [
+    { name: "Red", hex: "#E63946" },
+    { name: "Orange", hex: "#F3722C" },
+    { name: "Yellow", hex: "#F9C74F" },
+    { name: "Green", hex: "#43AA8B" },
+    { name: "Blue", hex: "#4361EE" },
+    { name: "Purple", hex: "#9D4EDD" },
+    { name: "Pink", hex: "#FF70A6" },
+    { name: "Brown", hex: "#8B5E34" },
+    { name: "Black", hex: "#22223B" },
+    { name: "White", hex: "#FFFFFF" }
+  ];
+
+  function buildPalette(container, onPick) {
+    var buttons = [];
+    COLORS.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.className = "swatch" + (i === 0 ? " active" : "");
+      b.style.background = c.hex;
+      b.setAttribute("aria-label", c.name);
+      b.title = c.name;
+      b.addEventListener("click", function () {
+        buttons.forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        playPop(520 + i * 30);
+        onPick(c.hex);
+      });
+      container.appendChild(b);
+      buttons.push(b);
+    });
+    return buttons;
+  }
+
+  /* ============================================================
+     Tabs
+     ============================================================ */
+
+  var tabButtons = document.querySelectorAll(".tab-btn");
+  var panels = document.querySelectorAll(".panel");
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      tabButtons.forEach(function (b) {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
+      btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
+      var target = "panel-" + btn.dataset.tab;
+      panels.forEach(function (p) {
+        p.classList.toggle("active", p.id === target);
+      });
+      playPop(440);
+    });
+  });
+
+  /* ============================================================
+     PAGE 1: Free draw canvas
+     ============================================================ */
+
+  var canvas = document.getElementById("drawCanvas");
+  var ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+  function initCanvas() {
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  initCanvas();
+
+  var currentTool = "brush";
+  var currentColor = COLORS[0].hex;
+  var brushSize = 10;
+  var drawing = false;
+  var lastX = 0, lastY = 0;
+  var undoStack = [];
+  var redoStack = [];
+  var MAX_HISTORY = 25;
+
+  function pushHistory() {
+    try {
+      undoStack.push(canvas.toDataURL("image/png"));
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack.length = 0;
+      updateHistoryButtons();
+    } catch (e) { /* ignore */ }
+  }
+
+  function restoreFromDataURL(url) {
+    var img = new Image();
+    img.onload = function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = url;
+  }
+
+  var undoBtn = document.getElementById("undoBtn");
+  var redoBtn = document.getElementById("redoBtn");
+
+  function updateHistoryButtons() {
+    undoBtn.disabled = undoStack.length === 0;
+    redoBtn.disabled = redoStack.length === 0;
+  }
+  updateHistoryButtons();
+
+  undoBtn.addEventListener("click", function () {
+    if (undoStack.length === 0) return;
+    redoStack.push(canvas.toDataURL("image/png"));
+    var prev = undoStack.pop();
+    restoreFromDataURL(prev);
+    updateHistoryButtons();
+    playPop(380);
+  });
+
+  redoBtn.addEventListener("click", function () {
+    if (redoStack.length === 0) return;
+    undoStack.push(canvas.toDataURL("image/png"));
+    var next = redoStack.pop();
+    restoreFromDataURL(next);
+    updateHistoryButtons();
+    playPop(380);
+  });
+
+  var toolButtons = document.querySelectorAll(".tool-btn");
+  toolButtons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      toolButtons.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      currentTool = b.dataset.tool;
+      canvas.style.cursor = currentTool === "fill" ? "pointer" : "crosshair";
+      playPop(500);
+    });
+  });
+
+  var sizeButtons = document.querySelectorAll(".size-btn");
+  sizeButtons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      sizeButtons.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      brushSize = parseInt(b.dataset.size, 10);
+      playPop(460);
+    });
+  });
+
+  var drawPalette = document.getElementById("drawPalette");
+  buildPalette(drawPalette, function (hex) { currentColor = hex; });
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  function strokeDot(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = currentTool === "eraser" ? "#FFFFFF" : currentColor;
+    ctx.fill();
+  }
+
+  function strokeLine(x0, y0, x1, y1) {
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = brushSize;
+    ctx.strokeStyle = currentTool === "eraser" ? "#FFFFFF" : currentColor;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+  }
+
+  function hexToRgba(hex) {
+    var v = hex.replace("#", "");
+    if (v.length === 3) v = v.split("").map(function (c) { return c + c; }).join("");
+    var num = parseInt(v, 16);
+    return [(num >> 16) & 255, (num >> 8) & 255, num & 255, 255];
+  }
+
+  function colorsClose(a, b, tolerance) {
+    return Math.abs(a[0] - b[0]) <= tolerance &&
+           Math.abs(a[1] - b[1]) <= tolerance &&
+           Math.abs(a[2] - b[2]) <= tolerance &&
+           Math.abs(a[3] - b[3]) <= tolerance;
+  }
+
+  function floodFill(startX, startY, fillHex) {
+    var w = canvas.width, h = canvas.height;
+    startX = Math.floor(startX); startY = Math.floor(startY);
+    if (startX < 0 || startX >= w || startY < 0 || startY >= h) return;
+
+    var imgData = ctx.getImageData(0, 0, w, h);
+    var data = imgData.data;
+    var startPos = (startY * w + startX) * 4;
+    var startColor = [data[startPos], data[startPos + 1], data[startPos + 2], data[startPos + 3]];
+    var fillColor = hexToRgba(fillHex);
+
+    if (colorsClose(startColor, fillColor, 10)) return;
+
+    var visited = new Uint8Array(w * h);
+    var stack = [startX, startY];
+    var tolerance = 45;
+
+    while (stack.length) {
+      var y = stack.pop();
+      var x = stack.pop();
+      if (x < 0 || x >= w || y < 0 || y >= h) continue;
+      var idx = y * w + x;
+      if (visited[idx]) continue;
+      var pos = idx * 4;
+      var px = [data[pos], data[pos + 1], data[pos + 2], data[pos + 3]];
+      if (!colorsClose(px, startColor, tolerance)) continue;
+      visited[idx] = 1;
+      data[pos] = fillColor[0];
+      data[pos + 1] = fillColor[1];
+      data[pos + 2] = fillColor[2];
+      data[pos + 3] = 255;
+      stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  canvas.addEventListener("pointerdown", function (e) {
+    canvas.setPointerCapture(e.pointerId);
+    var pos = getPos(e);
+    if (currentTool === "fill") {
+      pushHistory();
+      floodFill(pos.x, pos.y, currentColor);
+      playPop(700);
+      return;
+    }
+    pushHistory();
+    drawing = true;
+    lastX = pos.x; lastY = pos.y;
+    strokeDot(pos.x, pos.y);
+  });
+
+  canvas.addEventListener("pointermove", function (e) {
+    if (!drawing) return;
+    var pos = getPos(e);
+    strokeLine(lastX, lastY, pos.x, pos.y);
+    lastX = pos.x; lastY = pos.y;
+  });
+
+  function endStroke() { drawing = false; }
+  canvas.addEventListener("pointerup", endStroke);
+  canvas.addEventListener("pointercancel", endStroke);
+  canvas.addEventListener("pointerleave", endStroke);
+
+  document.getElementById("clearBtn").addEventListener("click", function () {
+    pushHistory();
+    initCanvas();
+    playPop(300);
+  });
+
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    saveArtwork();
+  });
+
+  function saveArtwork() {
+    playPop(800);
+    canvas.toBlob(function (blob) {
+      if (!blob) { showToast("Couldn't save right now."); return; }
+      trySaveBlob(blob, "my-doodle.png");
+    }, "image/png");
+  }
+
+  function trySaveBlob(blob, filename) {
+    var handled = false;
+    var attemptCapability = function () {
+      if (!window.claude || typeof window.claude.use !== "function") return Promise.resolve(null);
+      return window.claude.use("downloads").catch(function () { return null; });
+    };
+    attemptCapability().then(function (downloads) {
+      if (downloads && typeof downloads.save === "function") {
+        handled = true;
+        downloads.save({ filename: filename, data: blob }).then(function () {
+          showToast("Saved! 🎉");
+        }).catch(function (err) {
+          if (!err || err.code !== "declined") {
+            showToast("Couldn't save right now.");
+          }
+        });
+      } else {
+        fallbackDownload(blob, filename);
+      }
+    }).catch(function () {
+      if (!handled) fallbackDownload(blob, filename);
+    });
+  }
+
+  function fallbackDownload(blob, filename) {
+    try {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      showToast("Saved! 🎉");
+    } catch (e) {
+      showToast("Saving isn't available here.");
+    }
+  }
+
+  /* ============================================================
+     PAGE 2: Digital coloring book
+     ============================================================ */
+
+  var currentColoringColor = COLORS[0].hex;
+  var colorPalette = document.getElementById("colorPalette");
+  buildPalette(colorPalette, function (hex) { currentColoringColor = hex; });
+
+  var picButtons = document.querySelectorAll(".pic-btn[data-pic]");
+  var coloringSvgs = document.querySelectorAll(".coloring-svg");
+
+  picButtons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      picButtons.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      var pic = b.dataset.pic;
+      coloringSvgs.forEach(function (svg) {
+        svg.classList.toggle("active", svg.dataset.pic === pic);
+      });
+      playPop(500);
+    });
+  });
+
+  coloringSvgs.forEach(function (svg) {
+    svg.addEventListener("click", function (e) {
+      var target = e.target;
+      if (!target.classList || !target.classList.contains("fillable")) return;
+      target.style.fill = currentColoringColor;
+      playPop(650);
+    });
+  });
+
+  document.getElementById("clearColorsBtn").addEventListener("click", function () {
+    var active = document.querySelector(".coloring-svg.active");
+    if (!active) return;
+    active.querySelectorAll(".fillable").forEach(function (el) {
+      el.style.fill = "#FFFFFF";
+    });
+    playPop(300);
+  });
+
+  /* ============================================================
+     PAGE 3: Step-by-step drawing lessons
+     ============================================================ */
+
+  var lessonsData = {
+    cat: {
+      label: "Cat",
+      steps: [
+        { text: "Start with one big circle for the head.", svg: '<circle cx="200" cy="170" r="80"/>' },
+        { text: "Add two triangle ears on top.", svg: '<polygon points="140,110 160,50 185,105"/><polygon points="260,110 240,50 215,105"/>' },
+        { text: "Draw an oval underneath for the body.", svg: '<ellipse cx="200" cy="300" rx="95" ry="70"/>' },
+        { text: "Add a curly tail on the side.", svg: '<path d="M290 330 Q345 310 335 250 Q330 220 300 228"/>' },
+        { text: "Finish with eyes, a nose, and whiskers!", svg: '<circle cx="175" cy="160" r="8" fill="#2D2D2D"/><circle cx="225" cy="160" r="8" fill="#2D2D2D"/><polygon points="200,180 190,192 210,192" fill="#2D2D2D"/><line x1="120" y1="185" x2="60" y2="175"/><line x1="120" y1="195" x2="60" y2="202"/><line x1="280" y1="185" x2="340" y2="175"/><line x1="280" y1="195" x2="340" y2="202"/>' }
+      ]
+    },
+    star: {
+      label: "Star",
+      steps: [
+        { text: "Draw a small dot to mark the center.", svg: '<circle cx="200" cy="190" r="6" fill="#2D2D2D"/>' },
+        { text: "Sketch five lines pointing outward like a burst.", svg: '<line x1="200" y1="190" x2="200" y2="60"/><line x1="200" y1="190" x2="320" y2="150"/><line x1="200" y1="190" x2="280" y2="300"/><line x1="200" y1="190" x2="120" y2="300"/><line x1="200" y1="190" x2="80" y2="150"/>' },
+        { text: "Connect the tips to make a star outline.", svg: '<polygon points="200,40 235,150 350,150 260,215 290,330 200,260 110,330 140,215 50,150 165,150"/>' },
+        { text: "Give your star a happy face.", svg: '<circle cx="175" cy="185" r="7" fill="#2D2D2D"/><circle cx="225" cy="185" r="7" fill="#2D2D2D"/><path d="M180 212 Q200 228 220 212"/>' }
+      ]
+    },
+    robot: {
+      label: "Robot",
+      steps: [
+        { text: "Draw a rounded square for the head.", svg: '<rect x="130" y="70" width="140" height="110" rx="20"/>' },
+        { text: "Add two round eyes and a mouth.", svg: '<circle cx="170" cy="120" r="12" fill="#2D2D2D"/><circle cx="230" cy="120" r="12" fill="#2D2D2D"/><rect x="175" y="150" width="50" height="12" rx="6" fill="#2D2D2D"/>' },
+        { text: "Pop an antenna on top.", svg: '<line x1="200" y1="70" x2="200" y2="35"/><circle cx="200" cy="28" r="10" fill="#2D2D2D"/>' },
+        { text: "Draw a bigger rounded rectangle for the body.", svg: '<rect x="110" y="190" width="180" height="130" rx="18"/>' },
+        { text: "Add straight arms and legs.", svg: '<rect x="65" y="200" width="35" height="95" rx="10"/><rect x="300" y="200" width="35" height="95" rx="10"/><rect x="140" y="325" width="45" height="45" rx="8"/><rect x="215" y="325" width="45" height="45" rx="8"/>' },
+        { text: "Finish with two buttons on the body.", svg: '<circle cx="200" cy="230" r="8" fill="#2D2D2D"/><circle cx="200" cy="260" r="8" fill="#2D2D2D"/>' }
+      ]
+    }
+  };
+
+  var currentLessonKey = "cat";
+  var currentStepIndex = 0;
+
+  var lessonSvg = document.getElementById("lessonSvg");
+  var stepIndicator = document.getElementById("stepIndicator");
+  var stepText = document.getElementById("stepText");
+  var prevStepBtn = document.getElementById("prevStepBtn");
+  var nextStepBtn = document.getElementById("nextStepBtn");
+
+  function renderLesson() {
+    var lesson = lessonsData[currentLessonKey];
+    var html = "";
+    for (var i = 0; i <= currentStepIndex; i++) {
+      var isNew = i === currentStepIndex;
+      html += '<g class="lesson-shape' + (isNew ? " step-new" : "") + '">' + lesson.steps[i].svg + "</g>";
+    }
+    lessonSvg.innerHTML = html;
+    stepIndicator.textContent = "Step " + (currentStepIndex + 1) + " of " + lesson.steps.length;
+    stepText.textContent = lesson.steps[currentStepIndex].text;
+    prevStepBtn.disabled = currentStepIndex === 0;
+    nextStepBtn.disabled = currentStepIndex === lesson.steps.length - 1;
+    nextStepBtn.textContent = currentStepIndex === lesson.steps.length - 1 ? "All done! 🎉" : "Next →";
+  }
+
+  var lessonPicButtons = document.querySelectorAll(".pic-btn[data-lesson]");
+  lessonPicButtons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      lessonPicButtons.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      currentLessonKey = b.dataset.lesson;
+      currentStepIndex = 0;
+      renderLesson();
+      playPop(500);
+    });
+  });
+
+  prevStepBtn.addEventListener("click", function () {
+    if (currentStepIndex > 0) {
+      currentStepIndex--;
+      renderLesson();
+      playPop(420);
+    }
+  });
+
+  nextStepBtn.addEventListener("click", function () {
+    var lesson = lessonsData[currentLessonKey];
+    if (currentStepIndex < lesson.steps.length - 1) {
+      currentStepIndex++;
+      renderLesson();
+      playPop(720);
+    } else {
+      playPop(900);
+      showToast("Great drawing! 🌟");
+    }
+  });
+
+  renderLesson();
+
+})();
+</script>
+</body>
+</html>
